@@ -6,6 +6,11 @@ name = "pypi"
 [packages]
 fastapi = "*"
 uvicorn = {extras = ["standard"], version = "*"}
+pydantic = "*"
+python-multipart = "*"
+opencv-python = "*"
+numpy = "*"
+scipy = "*"
 
 [dev-packages]
 
