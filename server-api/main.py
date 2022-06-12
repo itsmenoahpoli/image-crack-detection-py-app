@@ -1,15 +1,15 @@
 from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-
-
 # Image crack detection library
+import uuid
 import cv2
 import math
 import numpy as np
 import scipy.ndimage
 
-app = FastAPI()
+app = FastAPI()\
 
 def process_uploaded_image(imageDir):
 
@@ -60,15 +60,20 @@ def process_uploaded_image(imageDir):
     threshold = 4 * fudgefactor * np.mean(mag)
     mag[mag < threshold] = 0
 
+    temp_filename_uuid = str(uuid.uuid4().hex)
+    temp_filename = f"{temp_filename_uuid}-wallcrack.jpg"
+    temp_file_directory = './storage/'
+
     #either get edges directly
     if with_nmsup is False:
         mag = cv2.normalize(mag, 0, 255, cv2.NORM_MINMAX)
         kernel = np.ones((5,5),np.uint8)
         result = cv2.morphologyEx(mag, cv2.MORPH_CLOSE, kernel)
+        cv2.imwrite(f"{temp_file_directory}/{temp_filename}", result)
         # cv2.imshow('im', result)
         # cv2.waitKey()
 
-        return result
+        return f"{temp_file_directory}/{temp_filename}"
 
     #or apply a non-maximal suppression
     else:
@@ -82,10 +87,13 @@ def process_uploaded_image(imageDir):
         kernel = np.ones((5,5),np.uint8)
         result = cv2.morphologyEx(mag, cv2.MORPH_CLOSE, kernel)
 
+        
+        cv2.imwrite(f"{temp_file_directory}/{temp_filename}", result)
+
         # cv2.imshow('im', result)
         # cv2.waitKey()
 
-        return result
+        return f"{temp_file_directory}/{temp_filename}"
 
 # ---------------------------------------------------------------------------------------------------------- #
 
@@ -99,7 +107,7 @@ async def process_image(file: UploadFile):
     with open(temp_uploaded_file_location, "wb+") as file_object:
         file_object.write(file.file.read())
 
-    return process_uploaded_image(temp_uploaded_file_location)
+    return FileResponse(process_uploaded_image(temp_uploaded_file_location))
 
     # return {
     #   "message": f"file '{file.filename}' saved at '{temp_uploaded_file_location}'"
