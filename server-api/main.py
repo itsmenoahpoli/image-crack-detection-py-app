@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 # Image crack detection library
@@ -9,7 +10,21 @@ import math
 import numpy as np
 import scipy.ndimage
 
-app = FastAPI()\
+#CORS WHITELIST URLs
+origins = [
+    "http://localhost:3000",
+]
+
+app = FastAPI()
+# CORS MIDDLEWARE
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 def process_uploaded_image(imageDir):
 
